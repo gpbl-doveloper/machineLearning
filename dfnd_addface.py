@@ -17,54 +17,33 @@ predictor = dlib.shape_predictor(face_landmark_predictor_path)
 
 known_face = [(("asset/images/muruk/muruk1.jpeg", "asset/images/muruk/muruk2.jpeg", "asset/images/muruk/muruk3.jpeg", "asset/images/muruk/muruk4.jpeg", "asset/images/muruk/muruk5.jpeg"), "muruk"),
               (("asset/images/jjongut/jjongut1.jpeg", "asset/images/jjongut/jjongut2.jpeg", "asset/images/jjongut/jjongut3.jpeg", "asset/images/jjongut/jjongut4.jpeg", "asset/images/jjongut/jjongut5.jpeg"), "jjongut")]
+
 class Add_dog_face:
-    def __init__(self, user_id):
-        self.user_id = user_id
+    def __init__(self):
         self.known_face_encodings = []   
         self.known_face_names = []
-        self.face_specifics = []
-        self.DONE = False
     
-    def get_images(self):
-        user_folder = os.path.join('firebase', self.user_id)
-        known_faces = []
-        
-        if os.path.exists(user_folder):
-            pets = os.listdir(user_folder)
-            for pet in pets:
-                pet_folder = os.path.join(user_folder, pet)
-                if os.path.isdir(pet_folder):
-                    images = [os.path.join(pet_folder, file) for file in os.listdir(pet_folder) if file.endswith(('.jpg', '.jpeg', '.png'))]
-                    if images:
-                        known_faces.append((tuple(images), pet))
-        return known_faces
-    
-    def add_known_face(self):
-        known_face = self.get_images()
+    def add_known_face(self, known_face):
         Finding = Find_dog_face()
         target_width = 200
-        name_len = len(known_face)
-        
-        for i in range(name_len):
-            face_image_paths = []
-            name = None
-            face_image_paths, name = known_face[i]
-            face_specific = []
-            
-            for face_image_path in face_image_paths:
+        for image_paths, name in known_face:  # 여러 이미지 경로를 순회합니다.
+            for face_image_path in image_paths:  # 각 이미지 경로에 대해 반복 처리합니다.
                 image = Finding.resize_image(face_image_path, target_width)
                 dets_locations = face_locations(image, 1)
                 face_encodings = face_recognition.face_encodings(image, dets_locations)
 
+                # 감지된 얼굴에 대한 인코딩을 저장
                 for face_encoding, location in zip(face_encodings, dets_locations):
                     detected_face_image = draw_label(image, location, name)
-                    face_specific.append(face_encoding)
                     self.known_face_encodings.append(face_encoding)
                     self.known_face_names.append(name)
-            self.face_specifics.append(face_specific)
+                
+                # 이미지 출력
+                Finding.plt_imshow(["Input Image", "Detected Face"], [image, detected_face_image], result_name='known_face.jpg')
+
+        # 얼굴 인코딩과 이름을 numpy 파일로 저장
         np.save('numpy/known_faces.npy', self.known_face_encodings)
         np.save('numpy/known_names.npy', self.known_face_names)
-        self.DONE = True
 
 def _trim_css_to_bounds(css, image_shape):
     return max(css[0], 0), min(css[1], image_shape[1]), min(css[2], image_shape[0]), max(css[3], 0)
@@ -76,7 +55,7 @@ def _raw_face_locations(img, number_of_times_to_upsample=1):
     return detector(img, number_of_times_to_upsample)
 
 def face_locations(img, number_of_times_to_upsample=1):
-    return [_trim_css_to_bounds(_rect_to_css(face.rect), img.shape) for face in _raw_face_locations(img, number_of_times_to_upsample)]    
+    return [_trim_css_to_bounds(_rect_to_css(face.rect), img.shape) for face in _raw_face_locations(img, number_of_times_to_upsample)]
 
 def draw_label(input_image, coordinates, label):
     image = input_image.copy()
@@ -86,9 +65,8 @@ def draw_label(input_image, coordinates, label):
     return image
 
 def main():
-    user_id = 'TDQvhGXWwQcsFWrJ0wmnTS38d602'
-    adding = Add_dog_face(user_id)
-    adding.add_known_face()
-    
+    adding = Add_dog_face()
+    adding.add_known_face(known_face)
+
 if __name__ == '__main__':
     main()

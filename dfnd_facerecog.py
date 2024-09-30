@@ -19,8 +19,8 @@ image_path = 'asset/images/general/samuruk.jpeg'
 
 class Dog_facial_recognition:
     def __init__(self):
-        self.known_face_encodings = np.load('known_faces.npy')
-        self.known_face_names = np.load('known_names.npy')
+        self.known_face_encodings = np.load('numpy/known_faces.npy')
+        self.known_face_names = np.load('numpy/known_names.npy')
     
     def detection(self, image_path, size=None):
         finding = Find_dog_face()
