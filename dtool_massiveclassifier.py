@@ -1,10 +1,10 @@
 import os
-from dfnd_facerecog import Dog_facial_recognition
+from dfnd_facerecog import dogFaceRecognize
 
 class dogImageClassifier:
     def __init__(self, image_dir):
         self.image_dir = image_dir
-        self.recognizer = Dog_facial_recognition()
+        self.recognizer = dogFaceRecognize()
     
     def classifyImages(self):
         for image_file in os.listdir(self.image_dir):

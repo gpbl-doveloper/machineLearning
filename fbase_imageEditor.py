@@ -10,13 +10,13 @@ class FirebaseManager:
     def __init__(self):
         self.bucket = storage.bucket()
 
-    def delete_file(self, file_path):
+    def deleteFile(self, file_path):
         # 특정 파일 삭제
         blob = self.bucket.blob(file_path)
         blob.delete()
         print(f"Deleted {file_path} from Firebase Storage.")
 
-    def delete_folder(self, folder_name):
+    def deleteFolder(self, folder_name):
         # 특정 폴더 내 모든 파일 삭제
         blobs = self.bucket.list_blobs(prefix=folder_name)
         for blob in blobs:
@@ -26,10 +26,10 @@ class FirebaseManager:
 def main():
     manager = FirebaseManager()
     # 파일 삭제
-    # manager.delete_file('muruk/muruk1.jpeg')  # 특정 파일 경로
+    # manager.deleteFile('muruk/muruk1.jpeg')  # 특정 파일 경로
 
     # 폴더 삭제
-    manager.delete_folder('muruk')  # 특정 애견 이름 폴더 삭제
+    manager.deleteFolder('muruk')  # 특정 애견 이름 폴더 삭제
 
 if __name__ == '__main__':
     main()
