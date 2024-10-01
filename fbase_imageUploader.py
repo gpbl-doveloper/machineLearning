@@ -24,8 +24,8 @@ class FirebaseUploader:
 
 def main():
 
-    image_dir = './asset/images/muruk'  # 로컬에 저장된 이미지 경로
-    dog_name = 'muruk'  # 애견 이름을 폴더로 사용
+    image_dir = './asset/images/jjongut'  # 로컬에 저장된 이미지 경로
+    dog_name = 'jjongut'  # 애견 이름을 폴더로 사용
     uploader = FirebaseUploader()
     # 디렉토리 내의 모든 이미지를 업로드
     for image_file in os.listdir(image_dir):
