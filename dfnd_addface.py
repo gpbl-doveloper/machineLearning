@@ -10,9 +10,6 @@ firebase_admin.initialize_app(cred, {'storageBucket': 'dogeface-2dc56.appspot.co
 
 detector = dlib.cnn_face_detection_model_v1('model/dogHeadDetector.dat')
 
-# 학습할 애견들의 이름 리스트
-dog_name_list = ['muruk', 'jjongut']
-
 class addDogFace:
     def __init__(self):
         self.known_face_encodings = []   
@@ -26,40 +23,38 @@ class addDogFace:
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
         return image
 
-    def addKnownFaces(self):
-        for dog_name in dog_name_list:
-            print(f"Processing dog: {dog_name}")
-            known_face = [
-                ([
-                    f'{dog_name}/{dog_name}1.jpeg',
-                    f'{dog_name}/{dog_name}2.jpeg',
-                    f'{dog_name}/{dog_name}3.jpeg',
-                    f'{dog_name}/{dog_name}4.jpeg',
-                    f'{dog_name}/{dog_name}5.jpeg'
-                ], dog_name)
-            ]
+    def addKnownFaces(self, dog_name):
+        known_face = [
+            ([
+                f'{dog_name}/{dog_name}1.jpeg',
+                f'{dog_name}/{dog_name}2.jpeg',
+                f'{dog_name}/{dog_name}3.jpeg',
+                f'{dog_name}/{dog_name}4.jpeg',
+                f'{dog_name}/{dog_name}5.jpeg'
+            ], dog_name)
+        ]
 
-            for image_paths, name in known_face:
-                for face_image_path in image_paths:
-                    image = self.getImageFromFirebase(face_image_path)
-                    if image is None:
-                        print(f"Could not load image {face_image_path}")
-                        continue
+        for image_paths, name in known_face:
+            for face_image_path in image_paths:
+                image = self.getImageFromFirebase(face_image_path)
+                if image is None:
+                    print(f"Could not load image {face_image_path}")
+                    continue
 
-                    image = self.resizeImage(image, target_width=200)
+                image = self.resizeImage(image, target_width=200)
 
-                    dets_locations = faceLocations(image, 1)
-                    face_encodings = face_recognition.face_encodings(image, dets_locations)
+                dets_locations = faceLocations(image, 1)
+                face_encodings = face_recognition.face_encodings(image, dets_locations)
 
-                    if face_encodings:
-                        for face_encoding, location in zip(face_encodings, dets_locations):
-                            self.known_face_encodings.append(face_encoding)
-                            self.known_face_names.append(name)
+                if face_encodings:
+                    for face_encoding, location in zip(face_encodings, dets_locations):
+                        self.known_face_encodings.append(face_encoding)
+                        self.known_face_names.append(name)
 
-                            top, right, bottom, left = location
-                            print(f"Dog: {name}, Face detected at [{top}, {right}, {bottom}, {left}]")
-                    else:
-                        print(f"No face detected in {face_image_path}")
+                        top, right, bottom, left = location
+                        print(f"Dog: {name}, Face detected at [{top}, {right}, {bottom}, {left}]")
+                else:
+                    print(f"No face detected in {face_image_path}")
 
         np.save('numpy/known_faces.npy', self.known_face_encodings)
         np.save('numpy/known_names.npy', self.known_face_names)
@@ -79,10 +74,3 @@ def cssBounder(css, image_shape):
 
 def rectCss(rect):
     return rect.top(), rect.right(), rect.bottom(), rect.left()
-
-def main():
-    adding = addDogFace()
-    adding.addKnownFaces()
-
-if __name__ == '__main__':
-    main()
