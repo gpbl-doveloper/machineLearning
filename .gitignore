@@ -1,0 +1,34 @@
+# Ignore Google Cloud service account key
+dogeface-2dc56-firebase-adminsdk-6olnt-b6a5aab139.json
+
+# Ignore Python compiled files
+__pycache__/
+*.pyc
+
+# Ignore environment and dependency files
+env/
+venv/
+*.env
+*.envrc
+
+# Ignore log files and temporary files
+*.log
+*.tmp
+
+# Ignore IDE or Editor specific files
+.vscode/
+.idea/
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore any JPEG or PNG images
+*.jpeg
+*.png
+
+# Ignore all node_modules (if using Node.js)
+node_modules/
+
+# Ignore any sensitive configuration files
+*.config.json
