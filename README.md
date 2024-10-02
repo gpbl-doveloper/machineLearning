@@ -36,3 +36,8 @@ The code in this repository is divided into three main functions:
 - **`fbase_imageeditor.py`**: Firebase 스토리지 내에 특정 애견의 이미지를 저장하고 있는 버켓(폴더)를 삭제하는 기능을 수행합니다.
 
   **`fbase_imageeditor.py`** is used to delete the bucket (folder) in Firebase storage that contains the images of a specific dog.
+
+  ## 참조 / References
+
+- [dlib_dog_face_recognition](https://github.com/yunwoong7/dlib_dog_face_recognition)
+- [DogRecognition](https://github.com/PAWSITIVE2024/DogRecognition/tree/main)

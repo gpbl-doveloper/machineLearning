@@ -23,7 +23,7 @@ class FirebaseManager:
 def main():
     manager = FirebaseManager()
     # manager.deleteFile('muruk/muruk1.jpeg')  
-    manager.deleteFolder('muruk')
+    manager.deleteFolder('jjongut')
 
 if __name__ == '__main__':
     main()
