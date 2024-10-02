@@ -10,12 +10,12 @@ This repository is part of a project I participated in as a member of the KMU Gl
 이 레포지토리에 포함된 코드는 크게 세 가지 주요 기능으로 구분됩니다:
 1. **애견 얼굴 탐지 및 개수 세기**
 2. **애견 얼굴 특징 학습 및 저장**
-3. **이미지 속 애견 얼굴의 주인 식별**
+3. **이미지 속 애견 얼굴 식별**
 
-The code included in this repository is divided into three main functions:
+The code in this repository is divided into three main functions:
 1. **Detecting and counting dog faces**
-2. **Learning and storing dog face features**
-3. **Identifying the owner of the dog face in the image**
+2. **Learning and storing features of dog face**
+3. **Identifying dog faces in images**
 
 - **`dfnd_facefinding.py`**: 투입된 이미지 속 강아지의 얼굴을 새는 코드가 구현되어 있습니다. 빠른 속도를 위해, 작업 중 이미지의 크기를 조정하고 색을 흑백으로 조정합니다. 이러한 코드는 `dtool_howmanyface.py`를 통해 실행됩니다.
 
