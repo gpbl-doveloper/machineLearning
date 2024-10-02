@@ -30,7 +30,12 @@ class addDogFace:
                 f'{dog_name}/{dog_name}2.jpeg',
                 f'{dog_name}/{dog_name}3.jpeg',
                 f'{dog_name}/{dog_name}4.jpeg',
-                f'{dog_name}/{dog_name}5.jpeg'
+                f'{dog_name}/{dog_name}5.jpeg',
+                f'{dog_name}/{dog_name}6.jpeg',
+                f'{dog_name}/{dog_name}7.jpeg',
+                f'{dog_name}/{dog_name}8.jpeg',
+                f'{dog_name}/{dog_name}9.jpeg',
+                f'{dog_name}/{dog_name}10.jpeg'
             ], dog_name)
         ]
 

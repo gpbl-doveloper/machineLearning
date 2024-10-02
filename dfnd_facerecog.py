@@ -9,18 +9,19 @@ face_landmark_predictor_path = 'model/landmarkDetector.dat'
 detector = dlib.cnn_face_detection_model_v1(face_landmark_detector_path)
 predictor = dlib.shape_predictor(face_landmark_predictor_path)
 
-image_path = 'asset/images/general/samuruk.jpeg'
-
 class dogFaceRecognize:
     def __init__(self):
         self.known_face_encodings = np.load('numpy/known_faces.npy')
         self.known_face_names = np.load('numpy/known_names.npy')
     
-    def detection(self, image_path, size=None):
-        image = cv2.imread(image_path)
-        if image is None:
-            print(f"Failed to load image: {image_path}")
-            return
+    def detection(self, image_input, size=None):
+        if isinstance(image_input, str):
+            image = cv2.imread(image_input)
+            if image is None:
+                print(f"Failed to load image: {image_input}")
+                return
+        else:
+            image = image_input
 
         height, width = image.shape[:2]
         target_width = 200
@@ -49,7 +50,7 @@ class dogFaceRecognize:
 
         for (top, right, bottom, left), name in zip(dets_locations, face_names):
             print(f"Face detected at [{top}, {right}, {bottom}, {left}] identified as: {name}")
-        
+
 def cssBounder(css, image_shape):
     return max(css[0], 0), min(css[1], image_shape[1]), min(css[2], image_shape[0]), max(css[3], 0)
 
@@ -61,10 +62,3 @@ def rawFace(img, number_of_times_to_upsample=1):
 
 def faceLocations(img, number_of_times_to_upsample=1):
     return [cssBounder(rectCss(face.rect), img.shape) for face in rawFace(img, number_of_times_to_upsample)]
-
-def main():
-    detect = dogFaceRecognize()
-    detect.detection(image_path)
-
-if __name__ == '__main__':
-    main()
