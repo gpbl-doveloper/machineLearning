@@ -1,12 +1,23 @@
-import firebase_admin
-from firebase_admin import credentials, storage
+import boto3
 import cv2
 import numpy as np
 import dlib
 import face_recognition
+import os
+from dotenv import load_dotenv
 
-cred = credentials.Certificate('dogeface-2dc56-firebase-adminsdk-6olnt-b6a5aab139.json')
-firebase_admin.initialize_app(cred, {'storageBucket': 'dogeface-2dc56.appspot.com'})
+load_dotenv()
+
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id= os.getenv('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key= os.getenv('AWS_SECRET_ACCESS_KEY'),
+    region_name='us-east-1'
+)
+
+
+bucket_name = 'dogefacebucket'
+base_path = 'asset/images/'
 
 detector = dlib.cnn_face_detection_model_v1('model/dogHeadDetector.dat')
 
@@ -14,11 +25,11 @@ class addDogFace:
     def __init__(self):
         self.known_face_encodings = []   
         self.known_face_names = []
-        self.bucket = storage.bucket()
 
-    def getImageFromFirebase(self, image_path):
-        blob = self.bucket.blob(image_path)
-        image_bytes = blob.download_as_bytes()
+    def getImageFromS3(self, image_path):
+        s3_key = f"{base_path}{image_path}"
+        response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+        image_bytes = response['Body'].read()
         image_array = np.frombuffer(image_bytes, np.uint8)
         image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
         return image
@@ -41,7 +52,7 @@ class addDogFace:
 
         for image_paths, name in known_face:
             for face_image_path in image_paths:
-                image = self.getImageFromFirebase(face_image_path)
+                image = self.getImageFromS3(face_image_path)
                 if image is None:
                     print(f"Could not load image {face_image_path}")
                     continue

@@ -1,15 +1,16 @@
-# Ignore Google Cloud service account key
-dogeface-2dc56-firebase-adminsdk-6olnt-b6a5aab139.json
-
 # Ignore Python compiled files
 __pycache__/
 *.pyc
+/numpy/
 
 # Ignore environment and dependency files
 env/
 venv/
 *.env
 *.envrc
+package.zip
+/package/
+.env
 
 # Ignore log files and temporary files
 *.log
