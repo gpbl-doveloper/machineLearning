@@ -35,6 +35,7 @@ class addDogFace:
         return image
 
     def addKnownFaces(self, dog_name):
+        results = []
         known_face = [
             ([
                 f'{dog_name}/{dog_name}1.jpeg',
@@ -54,7 +55,7 @@ class addDogFace:
             for face_image_path in image_paths:
                 image = self.getImageFromS3(face_image_path)
                 if image is None:
-                    print(f"Could not load image {face_image_path}")
+                    results.append({"image_path": face_image_path, "status": "failed", "message": f"Could not load image {face_image_path}"})
                     continue
 
                 image = self.resizeImage(image, target_width=200)
@@ -68,13 +69,14 @@ class addDogFace:
                         self.known_face_names.append(name)
 
                         top, right, bottom, left = location
-                        print(f"Dog: {name}, Face detected at [{top}, {right}, {bottom}, {left}]")
+                        results.append({"image_path": face_image_path, "status": "success", "message": f"Dog: {name}, Face detected at [{top}, {right}, {bottom}, {left}]"})
                 else:
-                    print(f"No face detected in {face_image_path}")
+                    results.append({"image_path": face_image_path, "status": "failed", "message": f"No face detected in {face_image_path}"})
 
         np.save('numpy/known_faces.npy', self.known_face_encodings)
         np.save('numpy/known_names.npy', self.known_face_names)
-        print("Finished adding known faces and saved encodings.")
+        results.append({"status": "success", "message": "Finished adding known faces and saved encodings."})
+        return results
 
     def resizeImage(self, image, target_width=200):
         height, width = image.shape[:2]

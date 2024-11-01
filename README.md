@@ -1,3 +1,121 @@
+# Dog Face Recognition API Documentation
+
+이 API는 FastAPI를 통해 AWS S3에 있는 강아지 얼굴을 인식, 추가, 분류하는 기능을 제공합니다.
+
+---
+
+## Base URL
+
+- `http://<your-ec2-instance-ip>:<port>`
+
+---
+
+## Endpoints
+
+### 1. Add Known Faces
+강아지 이름 리스트를 기반으로, S3에서 각 강아지별 고정된 10장의 JPEG 이미지를 불러와 얼굴을 추가합니다.
+
+- **URL**: `/addKnownFaces/`
+- **Method**: `POST`
+- **Request Body**:
+  - `dogNames` (List[str]): 얼굴을 추가할 강아지 이름 리스트
+    ```json
+    {
+      "dogNames": ["dog1", "dog2"]
+    }
+    ```
+- **Response**:
+  - `status` (str): 요청 상태, 예: `"completed"`
+  - `results` (List[dict]): 각 강아지 이름별 처리 결과
+    ```json
+    {
+      "status": "completed",
+      "results": [
+        {
+          "dogName": "dog1",
+          "images": [
+            {
+              "imagePath": "dog1/dog11.jpeg",
+              "status": "success",
+              "message": "Face added successfully in dog1/dog11.jpeg"
+            },
+            ...
+          ]
+        }
+      ]
+    }
+    ```
+
+---
+
+### 2. Count Faces
+S3 이미지 경로 리스트를 기반으로, 각 이미지에 나타난 얼굴 수를 탐지합니다.
+
+- **URL**: `/countFaces/`
+- **Method**: `POST`
+- **Request Body**:
+  - `imageS3Paths` (List[str]): 얼굴을 탐지할 S3 이미지 경로 리스트
+    ```json
+    {
+      "imageS3Paths": ["s3/path/to/image1.jpeg", "s3/path/to/image2.jpeg"]
+    }
+    ```
+- **Response**:
+  - `status` (str): 요청 상태, 예: `"completed"`
+  - `results` (dict): 각 이미지에 대한 얼굴 탐지 결과
+    ```json
+    {
+      "status": "completed",
+      "results": {
+        "s3/path/to/image1.jpeg": {
+          "status": "success",
+          "faceCount": 2,
+          "message": "Found 2 faces in s3/path/to/image1.jpeg"
+        },
+        ...
+      }
+    }
+    ```
+
+---
+
+### 3. Classify Images
+S3 이미지 경로 리스트를 기반으로, 각 이미지에 나타난 강아지 얼굴을 인식하고 분류합니다.
+
+- **URL**: `/classifyImages/`
+- **Method**: `POST`
+- **Request Body**:
+  - `imageS3Paths` (List[str]): 강아지 얼굴을 인식할 S3 이미지 경로 리스트
+    ```json
+    {
+      "imageS3Paths": ["s3/path/to/image1.jpeg", "s3/path/to/image2.jpeg"]
+    }
+    ```
+- **Response**:
+  - `status` (str): 요청 상태, 예: `"completed"`
+  - `results` (dict): 각 이미지의 강아지 얼굴 분류 결과
+    ```json
+    {
+      "status": "completed",
+      "results": {
+        "s3/path/to/image1.jpeg": {
+          "status": "success",
+          "name": "dog1",
+          "message": "Face detected and identified as: dog1"
+        },
+        ...
+      }
+    }
+    ```
+
+---
+
+### 오류 처리
+
+1. **Unsupported File Format**: 지원되지 않는 파일 형식의 경우 `"message"`에 `Unsupported file format`이 반환됩니다.
+2. **S3 이미지 접근 오류**: 이미지 파일을 불러올 수 없을 경우 `"status": "failed"`와 함께 해당 오류 메시지가 반환됩니다.
+
+
 ## 레포지토리 안내 / Repository Overview
 
 이 레포지토리는 제가 국민대학교 내의 프로그램인 KMU Global PBL Program 2024의 일원으로 활동했을 당시 참여하였던 프로젝트의 일부입니다. 해당 프로젝트는 애견센터의 행정을 보조하는 데에 목적이 있으며, 센터가 견주에게 보내는 알림장에 개발의 중점이 맞춰져 있습니다.
