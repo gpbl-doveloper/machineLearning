@@ -15,6 +15,7 @@ class dogFaceRecognize:
         self.known_face_names = np.load('numpy/known_names.npy')
     
     def detection(self, image_input, size=None):
+        # 이미지 로드 및 변환
         if isinstance(image_input, str):
             image = cv2.imread(image_input)
             if image is None:
