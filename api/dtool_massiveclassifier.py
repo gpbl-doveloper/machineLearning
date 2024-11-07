@@ -1,6 +1,7 @@
 import subprocess
 from core.dfnd_facerecog import dogFaceRecognize
 import cv2
+import numpy as np
 
 class dogImageClassifier:
     def __init__(self, bucket_name):
@@ -40,7 +41,7 @@ class dogImageClassifier:
                 self.recognizer.detection(image)
 
 def main():
-    bucket_name = "your-s3-bucket-name"  # 실제 S3 버킷 이름으로 변경 필요
+    bucket_name = "your-s3-bucket-name" 
     classifier = dogImageClassifier(bucket_name)
     classifier.classifyImages()
 
