@@ -50,7 +50,6 @@ class addDogFace:
                 "message": "No face detected in image"
             })
 
-        # 전체 인코딩 정보 저장
         np.save('numpy/known_faces.npy', self.known_face_encodings)
         np.save('numpy/known_names.npy', self.known_face_names)
         results.append({"status": "success", "message": "Finished adding known faces and saved encodings."})

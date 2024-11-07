@@ -12,7 +12,7 @@ app = FastAPI()
 
 learner = DogFaceLearner()
 finding = findDogFace()
-classifier = dogImageClassifier()
+classifier = dogImageClassifier() 
 
 class FaceLearnerRequest(BaseModel):
     s3_link: str

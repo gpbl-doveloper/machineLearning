@@ -27,7 +27,6 @@ class findDogFace:
         if image is None:
             return 0  
 
-        # 이미지 리사이즈 및 얼굴 탐지 수행
         image = self.resize_image(image, target_width=200)
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         dets = detector(gray_image, 1)
