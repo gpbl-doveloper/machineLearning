@@ -7,8 +7,8 @@ class DogFaceLearner:
     def __init__(self):
         self.adder = addDogFace()
 
-    def fetch_image_from_s3(self, s3_link, s3_key):
-        command = f"aws s3 cp s3://{s3_link}/{s3_key} -"
+    def fetch_image_from_s3(self, bucket_name, prefix, s3_key):
+        command = f"aws s3 cp s3://{bucket_name}/{prefix}/{s3_key} -"
         result = subprocess.run(command, shell=True, capture_output=True)
         if result.returncode == 0:
             image_bytes = result.stdout
@@ -21,8 +21,11 @@ class DogFaceLearner:
             return None
 
     def process_image_from_s3(self, s3_link, dog_name):
+        # s3_link에서 버킷 이름과 경로 분리
+        bucket_name, prefix = s3_link.split("/", 1)
+
         # S3 디렉토리의 파일 목록 가져오기
-        command = f"aws s3 ls s3://{s3_link}/"
+        command = f"aws s3 ls s3://{bucket_name}/{prefix}/"
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         
         if result.returncode != 0:
@@ -43,7 +46,7 @@ class DogFaceLearner:
         for image_file in image_files:
             print(f"Processing {image_file}")
             # 각 파일을 fetch_image_from_s3로 가져옴
-            image = self.fetch_image_from_s3(s3_link, image_file)
+            image = self.fetch_image_from_s3(bucket_name, prefix, image_file)
             if image is not None:
                 # 개별 이미지 파일에 대해 얼굴 인식 수행
                 result = self.adder.process_single_image(image, dog_name)
