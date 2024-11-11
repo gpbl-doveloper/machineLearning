@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from core.dfnd_facerecog import dogFaceRecognize
 
-class DogImageClassifier:
+class dogImageClassifier:
     def __init__(self, bucket_name, s3_directory, dog_name):
         self.bucket_name = bucket_name
         self.s3_directory = s3_directory
