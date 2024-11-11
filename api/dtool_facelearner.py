@@ -1,7 +1,7 @@
-from core.dfnd_addface import addDogFace
 import subprocess
 import cv2
 import numpy as np
+from core.dfnd_addface import addDogFace
 
 class DogFaceLearner:
     def __init__(self):
@@ -17,6 +17,7 @@ class DogFaceLearner:
             return image
         else:
             print(f"Failed to fetch image from S3 for key: {s3_key}")
+            print("Error:", result.stderr)  # 오류 메시지 출력
             return None
 
     def process_image_from_s3(self, s3_link, dog_name):
@@ -26,7 +27,10 @@ class DogFaceLearner:
         
         if result.returncode != 0:
             print("Failed to list images from S3 bucket.")
+            print("Error:", result.stderr)  # 오류 메시지 출력
             return {"status": "failed", "message": "Could not list images in S3 directory."}
+        else:
+            print("S3 list output:", result.stdout)  # 성공 시 출력 확인
 
         # 이미지 파일 목록 생성 (jpg, jpeg, png 확장자만 선택)
         image_files = [
