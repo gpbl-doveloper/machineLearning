@@ -7,6 +7,7 @@ from api.dtool_massiveclassifier import dogImageClassifier
 
 os.environ['AWS_ACCESS_KEY_ID'] = 'your-access-key-id'
 os.environ['AWS_SECRET_ACCESS_KEY'] = 'your-secret-access-key'
+os.environ['AWS_REGION'] = 'us-east-1'
 
 app = FastAPI()
 
