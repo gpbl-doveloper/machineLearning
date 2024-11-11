@@ -1,7 +1,7 @@
 import subprocess
 import cv2
 import numpy as np
-from dfnd_facerecog import dogFaceRecognize
+from core.dfnd_facerecog import dogFaceRecognize
 
 class dogImageClassifier:
     def __init__(self):
