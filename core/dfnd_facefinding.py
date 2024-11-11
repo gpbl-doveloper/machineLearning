@@ -10,23 +10,7 @@ class findDogFace:
     def __init__(self):
         pass
 
-    def fetch_image_from_s3(self, s3_link):
-        command = f"aws s3 cp {s3_link} -"
-        result = subprocess.run(command, shell=True, capture_output=True)
-        if result.returncode == 0:
-            image_bytes = result.stdout
-            image_array = np.frombuffer(image_bytes, np.uint8)
-            image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-            return image
-        else:
-            print("Failed to fetch image from S3.")
-            return None
-
-    def count_faces(self, s3_link):
-        image = self.fetch_image_from_s3(s3_link)
-        if image is None:
-            return 0  
-
+    def count_faces(self, image):
         image = self.resize_image(image, target_width=200)
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         dets = detector(gray_image, 1)

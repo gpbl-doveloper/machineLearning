@@ -1,4 +1,3 @@
-import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 from api.dtool_howmanyface import findDogFace
