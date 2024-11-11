@@ -23,11 +23,7 @@ class addDogFace:
             print("Failed to fetch image from S3.")
             return None
 
-    def process_single_image(self, s3_link, dog_name):
-        image = self.fetch_image_from_s3(s3_link)
-        if image is None:
-            return {"status": "failed", "message": "Could not load image from S3 link."}
-
+    def process_single_image(self, image, dog_name):
         # 이미지 리사이즈 및 얼굴 인식 수행
         image = self.resizeImage(image, target_width=200)
         dets_locations = faceLocations(image, 1)

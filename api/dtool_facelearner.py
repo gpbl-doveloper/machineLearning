@@ -9,11 +9,11 @@ class DogFaceLearner:
         self.adder = addDogFace()
 
     def fetch_image_from_s3(self, bucket_name, prefix, s3_key):
-        command = f"aws s3 cp s3://{bucket_name}/{prefix}/{s3_key}"
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, env=os.environ)
+        command = f"aws s3 cp s3://{bucket_name}/{prefix}{s3_key} -"
+        result = subprocess.run(command, shell=True, capture_output=True, env=os.environ)
         if result.returncode == 0:
             image_bytes = result.stdout
-            image_array = np.frombuffer(image_bytes.encode(), np.uint8)
+            image_array = np.frombuffer(image_bytes, np.uint8)
             image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
             return image
         else:
@@ -25,8 +25,10 @@ class DogFaceLearner:
     def process_image_from_s3(self, s3_link, dog_name):
         bucket_name, prefix = s3_link.split("/", 1)
 
-        command = f"aws s3 ls s3://{bucket_name}/{prefix}/"
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, env=os.environ)
+        
+        command = f"aws s3 ls s3://{bucket_name}/{prefix}"
+        print(command)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
         
         if result.returncode != 0:
             print("Failed to list images from S3 bucket.")
@@ -45,9 +47,10 @@ class DogFaceLearner:
         results = []
         for image_file in image_files:
             print(f"Processing {image_file}")
-            image = self.fetch_image_from_s3(bucket_name, prefix, image_file)
+            image = self.fetch_image_from_s3(bucket_name, prefix, image_file) # 이미지 객체가 불러와짐
+            
             if image is not None:
                 result = self.adder.process_single_image(image, dog_name)
                 results.append(result)
 
-        return {"status": "completed", "results": results}
+        return {"status": "completed", "results": results} 
