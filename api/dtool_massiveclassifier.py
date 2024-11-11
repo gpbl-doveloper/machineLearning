@@ -1,7 +1,7 @@
 import subprocess
 import cv2
 import numpy as np
-from core.dfnd_facerecog import dogFaceRecognize
+from dfnd_facerecog import dogFaceRecognize
 
 class dogImageClassifier:
     def __init__(self):
@@ -20,12 +20,14 @@ class dogImageClassifier:
             return None
 
     def classifyImages(self, s3_link):
+        # S3 디렉토리의 파일 목록 가져오기
         command = f"aws s3 ls s3://{s3_link}/"
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         if result.returncode != 0:
             print("Failed to list images from S3 bucket.")
             return
 
+        # 이미지 파일 목록 생성 (jpg, jpeg, png 확장자만 선택)
         image_files = [
             line.split()[-1]
             for line in result.stdout.splitlines()
