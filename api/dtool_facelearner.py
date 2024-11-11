@@ -9,7 +9,7 @@ class DogFaceLearner:
         self.adder = addDogFace()
 
     def fetch_image_from_s3(self, bucket_name, prefix, s3_key):
-        command = f"aws s3 cp s3://{bucket_name}/{prefix}/{s3_key} -"
+        command = f"aws s3 cp s3://{bucket_name}/{prefix}/{s3_key}"
         result = subprocess.run(command, shell=True, capture_output=True, text=True, env=os.environ)
         if result.returncode == 0:
             image_bytes = result.stdout
