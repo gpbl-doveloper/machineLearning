@@ -18,25 +18,20 @@ class DogFaceLearner:
             return image
         else:
             print(f"Failed to fetch image from S3 for key: {s3_key}")
-            print("Error (stderr):", result.stderr)  # 오류 메시지 출력
+            print("Error (stderr):", result.stderr)
             print("Error (stdout):", result.stdout)
             return None
 
     def process_image_from_s3(self, s3_link, dog_name):
         bucket_name, prefix = s3_link.split("/", 1)
-
-        
         command = f"aws s3 ls s3://{bucket_name}/{prefix}"
-        print(command)
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, env=os.environ)
+
         if result.returncode != 0:
             print("Failed to list images from S3 bucket.")
-            print("Error (stderr):", result.stderr)  
+            print("Error (stderr):", result.stderr)
             print("Error (stdout):", result.stdout)
             return {"status": "failed", "message": "Could not list images in S3 directory."}
-        else:
-            print("S3 list output:", result.stdout)
 
         image_files = [
             line.split()[-1]
@@ -47,10 +42,18 @@ class DogFaceLearner:
         results = []
         for image_file in image_files:
             print(f"Processing {image_file}")
-            image = self.fetch_image_from_s3(bucket_name, prefix, image_file) # 이미지 객체가 불러와짐
-            
+            image = self.fetch_image_from_s3(bucket_name, prefix, image_file)
             if image is not None:
                 result = self.adder.process_single_image(image, dog_name)
                 results.append(result)
 
-        return {"status": "completed", "results": results} 
+        return {"status": "completed", "results": results}
+
+    def process_multiple_images_from_s3(self, dogs_data):
+        overall_results = []
+        for data in dogs_data:
+            s3_link = data['s3_link']
+            dog_name = data['dog_name']
+            result = self.process_image_from_s3(s3_link, dog_name)
+            overall_results.append(result)
+        return overall_results

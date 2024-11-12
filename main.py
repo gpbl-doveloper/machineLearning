@@ -12,8 +12,7 @@ finding = findDogFace()
 
 
 class FaceLearnerRequest(BaseModel):
-    s3_link: str
-    dog_name: str
+    dogs_data: list[dict[str, str]] 
 
 class CountFacesRequest(BaseModel):
     s3_link: str
@@ -24,7 +23,7 @@ class ClassifyImagesRequest(BaseModel):
 @app.post("/faceLearner/") # S3 -> numpy 변환하는 모델의 인풋을 생성하는 어쩌구..
 async def process_image(request: FaceLearnerRequest):
     print("signal: API request received")
-    result = learner.process_image_from_s3(request.s3_link, request.dog_name)
+    result = learner.process_multiple_images_from_s3(request.dogs_data)
     return {"status": "completed", "result": result}
 
 @app.post("/countFaces/") # 강아지 사진인지 아닌지 판별하는 어쩌구..
