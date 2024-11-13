@@ -24,7 +24,7 @@ class DogFaceCounter:
             print("h", type(image))
             return None
 
-    def countFaces(self, s3Link):
+    def countFacesInS3Directory(self, s3Link):
         bucketName, prefix = s3Link.split("/", 1)
 
         command = f"aws s3 ls s3://{bucketName}/{prefix}"
