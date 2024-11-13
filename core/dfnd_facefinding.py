@@ -1,25 +1,24 @@
-import subprocess
 import cv2
 import numpy as np
 import dlib
 
-dog_face_detection_model = 'model/dogHeadDetector.dat'
-detector = dlib.cnn_face_detection_model_v1(dog_face_detection_model)
+dogFaceDetectionModel = 'model/dogHeadDetector.dat'
+detector = dlib.cnn_face_detection_model_v1(dogFaceDetectionModel)
 
-class findDogFace:
+class FindDogFace:
     def __init__(self):
         pass
 
-    def count_faces(self, image):
-        image = self.resize_image(image, target_width=200)
-        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        dets = detector(gray_image, 1)
-        face_count = len(dets)
-        print(f"Found {face_count} faces.")
-        return face_count
+    def countFaces(self, image):
+        image = self.resizeImage(image, targetWidth=200)
+        grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        dets = detector(grayImage, 1)
+        faceCount = len(dets)
+        print(f"Found {faceCount} faces.")
+        return faceCount
 
-    def resize_image(self, image, target_width=200):
+    def resizeImage(self, image, targetWidth=200):
         height, width = image.shape[:2]
-        new_height = int((target_width / width) * height)
-        resized_img = cv2.resize(image, (target_width, new_height), interpolation=cv2.INTER_AREA)
-        return resized_img
+        newHeight = int((targetWidth / width) * height)
+        resizedImg = cv2.resize(image, (targetWidth, newHeight), interpolation=cv2.INTER_AREA)
+        return resizedImg

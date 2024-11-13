@@ -2,33 +2,30 @@ import os
 import subprocess
 import cv2
 import numpy as np
-from core.dfnd_facerecog import dogFaceRecognize
+from core.dfnd_facerecog import DogFaceRecognize
 
-class dogImageClassifier:
+class DogImageClassifier:
     def __init__(self):
-        self.recognizer = dogFaceRecognize()
+        self.recognizer = DogFaceRecognize()
 
-    def fetch_image_from_s3(self, bucket_name, prefix, s3_key):
-        # 이미지 다운로드 명령어에서 슬래시 중복을 방지
-        command = f"aws s3 cp s3://{bucket_name}/{prefix}{s3_key} -"
+    def fetchImageFromS3(self, bucketName, prefix, s3Key):
+        command = f"aws s3 cp s3://{bucketName}/{prefix}{s3Key} -"
         result = subprocess.run(command, shell=True, capture_output=True, env=os.environ)
         if result.returncode == 0:
-            image_bytes = result.stdout
-            image_array = np.frombuffer(image_bytes, np.uint8)
-            image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+            imageBytes = result.stdout
+            imageArray = np.frombuffer(imageBytes, np.uint8)
+            image = cv2.imdecode(imageArray, cv2.IMREAD_COLOR)
             return image
         else:
-            print(f"Failed to fetch image from S3 for key: {s3_key}")
-            print("Error (stderr):", result.stderr)  # 오류 메시지 출력
+            print(f"Failed to fetch image from S3 for key: {s3Key}")
+            print("Error (stderr):", result.stderr)
             print("Error (stdout):", result.stdout)
             return None
 
-    def classifyImages(self, s3_link):
-        # s3_link를 bucket_name과 prefix로 분리
-        bucket_name, prefix = s3_link.split("/", 1)
+    def classifyImages(self, s3Link):
+        bucketName, prefix = s3Link.split("/", 1)
 
-        # S3 디렉토리의 파일 목록 가져오기
-        command = f"aws s3 ls s3://{bucket_name}/{prefix}"
+        command = f"aws s3 ls s3://{bucketName}/{prefix}"
         result = subprocess.run(command, shell=True, capture_output=True, text=True, env=os.environ)
         
         if result.returncode != 0:
@@ -39,19 +36,36 @@ class dogImageClassifier:
         else:
             print("S3 list output:", result.stdout)
 
-        # 이미지 파일 목록 생성 (jpg, jpeg, png 확장자만 선택)
-        image_files = [
+        imageFiles = [
             line.split()[-1]
             for line in result.stdout.splitlines()
             if line.endswith(('.jpeg', '.jpg', '.png'))
         ]
 
         results = []
-        for image_file in image_files:
-            print(f"Processing {image_file}")
-            image = self.fetch_image_from_s3(bucket_name, prefix, image_file)
+        for imageFile in imageFiles:
+            print(f"Processing {imageFile}")
+            image = self.fetchImageFromS3(bucketName, prefix, imageFile)
             if image is not None:
-                detection_result = self.recognizer.detection(image)
-                results.append(detection_result)
+                detectionResults = self.recognizer.detection(image)
+                
+                if detectionResults:  # 얼굴 인식 성공 시
+                    for detection in detectionResults:
+                        results.append({
+                            "imageFile": imageFile,
+                            "dogName": detection["name"]
+                        })
+                else:
+                    results.append({
+                        "imageFile": imageFile,
+                        "status": "failed",
+                        "message": "No face detected"
+                    })
+            else:
+                results.append({
+                    "imageFile": imageFile,
+                    "status": "failed",
+                    "message": "Image could not be fetched from S3"
+                })
 
         return {"status": "completed", "results": results}

@@ -3,63 +3,66 @@ import dlib
 import numpy as np
 import face_recognition
 
-face_landmark_detector_path = 'model/dogHeadDetector.dat'
-face_landmark_predictor_path = 'model/landmarkDetector.dat'
+faceLandmarkDetectorPath = 'model/dogHeadDetector.dat'
+faceLandmarkPredictorPath = 'model/landmarkDetector.dat'
 
-detector = dlib.cnn_face_detection_model_v1(face_landmark_detector_path)
-predictor = dlib.shape_predictor(face_landmark_predictor_path)
+detector = dlib.cnn_face_detection_model_v1(faceLandmarkDetectorPath)
+predictor = dlib.shape_predictor(faceLandmarkPredictorPath)
 
-class dogFaceRecognize:
+class DogFaceRecognize:
     def __init__(self):
-        self.known_face_encodings = np.load('numpy/known_faces.npy')
-        self.known_face_names = np.load('numpy/known_names.npy')
+        self.knownFaceEncodings = np.load('numpy/known_faces.npy')
+        self.knownFaceNames = np.load('numpy/known_names.npy')
     
-    def detection(self, image_input, size=None):
-        # 이미지 로드 및 변환
-        if isinstance(image_input, str):
-            image = cv2.imread(image_input)
+    def detection(self, imageInput, size=None):
+        if isinstance(imageInput, str):
+            image = cv2.imread(imageInput)
             if image is None:
-                print(f"Failed to load image: {image_input}")
-                return
+                print(f"Failed to load image: {imageInput}")
+                return None
         else:
-            image = image_input
+            image = imageInput
 
         height, width = image.shape[:2]
-        target_width = 200
-        new_height = int((target_width / width) * height)
-        resized_img = cv2.resize(image, (target_width, new_height), interpolation=cv2.INTER_AREA)
+        targetWidth = 200
+        newHeight = int((targetWidth / width) * height)
+        resizedImg = cv2.resize(image, (targetWidth, newHeight), interpolation=cv2.INTER_AREA)
 
-        dets_locations = faceLocations(resized_img)
-        face_encodings = face_recognition.face_encodings(resized_img, dets_locations)
+        detsLocations = faceLocations(resizedImg)
+        faceEncodings = face_recognition.face_encodings(resizedImg, detsLocations)
         
-        if not face_encodings:
+        results = []  # 인식 결과를 담을 리스트
+        if not faceEncodings:
             print("No faces detected.")
-            return
+            return None
 
-        face_names = []
-        for face_encoding in face_encodings:
-            matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding, tolerance=0.4)
+        for faceEncoding, location in zip(faceEncodings, detsLocations):
+            matches = face_recognition.compare_faces(self.knownFaceEncodings, faceEncoding, tolerance=0.4)
             name = "Unknown"
 
-            face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
-            best_match_index = np.argmin(face_distances)
+            faceDistances = face_recognition.face_distance(self.knownFaceEncodings, faceEncoding)
+            bestMatchIndex = np.argmin(faceDistances)
 
-            if matches[best_match_index]:
-                name = self.known_face_names[best_match_index]
+            if matches[bestMatchIndex]:
+                name = self.knownFaceNames[bestMatchIndex]
 
-            face_names.append(name)
-
-        for (top, right, bottom, left), name in zip(dets_locations, face_names):
+            top, right, bottom, left = location
+            results.append({
+                "name": name,
+                "location": [top, right, bottom, left]
+            })
             print(f"Face detected at [{top}, {right}, {bottom}, {left}] identified as: {name}")
 
-def cssBounder(css, image_shape):
-    return max(css[0], 0), min(css[1], image_shape[1]), min(css[2], image_shape[0]), max(css[3], 0)
+        return results if results else None
+
+def cssBounder(css, imageShape):
+    return max(css[0], 0), min(css[1], imageShape[1]), min(css[2], imageShape[0]), max(css[3], 0)
 
 def rectCss(rect):
     return rect.top(), rect.right(), rect.bottom(), rect.left()
 
-def rawFace(img, number_of_times_to_upsample=1):
-    return detector(img, number_of_times_to_upsample)
+def rawFace(img, numberOfTimesToUpsample=1):
+    return detector(img, numberOfTimesToUpsample)
 
-def faceLocations(img, number_of_times_to_upsample=1):
-    return [cssBounder(rectCss(face.rect), img.shape) for face in rawFace(img, number_of_times_to_upsample)]
+def faceLocations(img, numberOfTimesToUpsample=1):
+    return [cssBounder(rectCss(face.rect), img.shape) for face in rawFace(img, numberOfTimesToUpsample)]

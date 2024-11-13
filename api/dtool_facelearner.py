@@ -2,29 +2,29 @@ import os
 import subprocess
 import cv2
 import numpy as np
-from core.dfnd_addface import addDogFace
+from core.dfnd_addface import AddDogFace
 
 class DogFaceLearner:
     def __init__(self):
-        self.adder = addDogFace()
+        self.adder = AddDogFace()
 
-    def fetch_image_from_s3(self, bucket_name, prefix, s3_key):
-        command = f"aws s3 cp s3://{bucket_name}/{prefix}{s3_key} -"
+    def fetchImageFromS3(self, bucketName, prefix, s3Key):
+        command = f"aws s3 cp s3://{bucketName}/{prefix}{s3Key} -"
         result = subprocess.run(command, shell=True, capture_output=True, env=os.environ)
         if result.returncode == 0:
-            image_bytes = result.stdout
-            image_array = np.frombuffer(image_bytes, np.uint8)
-            image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+            imageBytes = result.stdout
+            imageArray = np.frombuffer(imageBytes, np.uint8)
+            image = cv2.imdecode(imageArray, cv2.IMREAD_COLOR)
             return image
         else:
-            print(f"Failed to fetch image from S3 for key: {s3_key}")
+            print(f"Failed to fetch image from S3 for key: {s3Key}")
             print("Error (stderr):", result.stderr)
             print("Error (stdout):", result.stdout)
             return None
 
-    def process_image_from_s3(self, s3_link, dog_name):
-        bucket_name, prefix = s3_link.split("/", 1)
-        command = f"aws s3 ls s3://{bucket_name}/{prefix}"
+    def processImageFromS3(self, s3Link, dogName):
+        bucketName, prefix = s3Link.split("/", 1)
+        command = f"aws s3 ls s3://{bucketName}/{prefix}"
         result = subprocess.run(command, shell=True, capture_output=True, text=True, env=os.environ)
 
         if result.returncode != 0:
@@ -33,27 +33,27 @@ class DogFaceLearner:
             print("Error (stdout):", result.stdout)
             return {"status": "failed", "message": "Could not list images in S3 directory."}
 
-        image_files = [
+        imageFiles = [
             line.split()[-1]
             for line in result.stdout.splitlines()
             if line.endswith(('.jpeg', '.jpg', '.png'))
         ]
 
         results = []
-        for image_file in image_files:
-            print(f"Processing {image_file}")
-            image = self.fetch_image_from_s3(bucket_name, prefix, image_file)
+        for imageFile in imageFiles:
+            print(f"Processing {imageFile}")
+            image = self.fetchImageFromS3(bucketName, prefix, imageFile)
             if image is not None:
-                result = self.adder.process_single_image(image, dog_name)
+                result = self.adder.processSingleImage(image, dogName)
                 results.append(result)
 
         return {"status": "completed", "results": results}
 
-    def process_multiple_images_from_s3(self, dogs_data):
-        overall_results = []
-        for data in dogs_data:
-            s3_link = data['s3_link']
-            dog_name = data['dog_name']
-            result = self.process_image_from_s3(s3_link, dog_name)
-            overall_results.append(result)
-        return overall_results
+    def processMultipleImagesFromS3(self, dogsData):
+        overallResults = []
+        for data in dogsData:
+            s3Link = data['s3Link']
+            dogName = data['dogName']
+            result = self.processImageFromS3(s3Link, dogName)
+            overallResults.append(result)
+        return overallResults
