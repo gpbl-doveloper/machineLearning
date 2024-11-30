@@ -1,14 +1,38 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 from api.dtool_howmanyface import DogFaceCounter
 from api.dtool_facelearner import DogFaceLearner
 from api.dtool_massiveclassifier import DogImageClassifier
-
+from pydantic import BaseModel
+from typing import List
 app = FastAPI()
 
 learner = DogFaceLearner()
 counter = DogFaceCounter()
 
+class ImgData(BaseModel):
+    fileId: int
+    url: str
+
+class DogData(BaseModel):
+    dogId: int
+    faces: List[ImgData]
+
+class ClassifyRequest(BaseModel):
+    dailyPictures: List[ImgData]
+    dogsData: List[DogData]
+
+@app.post("/face/")
+async def classify(request: ClassifyRequest):
+    learner.processMultipleImagesFromS3(request.dogsData)
+    classifier = DogImageClassifier()
+    print("signal: API request received")
+    return classifier.classifyImages(request.dailyPictures)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+'''
 class FaceLearnerRequest(BaseModel):
     dogsData: list[dict[str, str]]
 
@@ -33,7 +57,4 @@ async def classifyImages(request: ClassifyImagesRequest):
     classifier = DogImageClassifier()
     print("signal: API request received")
     return classifier.classifyImages(request.s3Link)
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+'''

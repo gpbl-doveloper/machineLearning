@@ -1,4 +1,3 @@
-import os
 import subprocess
 import cv2
 import numpy as np
@@ -8,64 +7,41 @@ class DogImageClassifier:
     def __init__(self):
         self.recognizer = DogFaceRecognize()
 
-    def fetchImageFromS3(self, bucketName, prefix, s3Key):
-        command = f"aws s3 cp s3://{bucketName}/{prefix}{s3Key} -"
-        result = subprocess.run(command, shell=True, capture_output=True, env=os.environ)
+    def fetchImage(self, url):
+        command = f"curl -s {url}"
+        result = subprocess.run(command, shell=True, capture_output=True)
+
         if result.returncode == 0:
             imageBytes = result.stdout
             imageArray = np.frombuffer(imageBytes, np.uint8)
             image = cv2.imdecode(imageArray, cv2.IMREAD_COLOR)
             return image
         else:
-            print(f"Failed to fetch image from S3 for key: {s3Key}")
+            print(f"Failed to fetch image from URL: {url}")
             print("Error (stderr):", result.stderr)
-            print("Error (stdout):", result.stdout)
             return None
 
-    def classifyImages(self, s3Link):
-        bucketName, prefix = s3Link.split("/", 1)
+    def classifyImages(self, dailyPictures):
+        groupedResults = {}
 
-        command = f"aws s3 ls s3://{bucketName}/{prefix}"
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, env=os.environ)
-        
-        if result.returncode != 0:
-            print("Failed to list images from S3 bucket.")
-            print("Error (stderr):", result.stderr)
-            print("Error (stdout):", result.stdout)
-            return {"status": "failed", "message": "Could not list images in S3 directory."}
-        else:
-            print("S3 list output:", result.stdout)
+        for picture in dailyPictures:
+            fileId = picture["fileId"]
+            url = picture["url"]
 
-        imageFiles = [
-            line.split()[-1]
-            for line in result.stdout.splitlines()
-            if line.endswith(('.jpeg', '.jpg', '.png'))
-        ]
+            print(f"Processing fileId: {fileId}, url: {url}")
+            image = self.fetchImage(url)
 
-        results = []
-        for imageFile in imageFiles:
-            print(f"Processing {imageFile}")
-            image = self.fetchImageFromS3(bucketName, prefix, imageFile)
             if image is not None:
                 detectionResults = self.recognizer.detection(image)
-                
-                if detectionResults:  # 얼굴 인식 성공 시
+                if detectionResults:
                     for detection in detectionResults:
-                        results.append({
-                            "imageFile": imageFile,
-                            "dogName": detection["name"]
-                        })
+                        dogId = detection["dogId"]
+                        if dogId not in groupedResults:
+                            groupedResults[dogId] = {"dogId": dogId, "imageFiles": []}
+                        groupedResults[dogId]["imageFiles"].append({"fileId": fileId, "url": url})
                 else:
-                    results.append({
-                        "imageFile": imageFile,
-                        "status": "failed",
-                        "message": "No face detected"
-                    })
+                    print(f"No faces detected for fileId: {fileId}, url: {url}")
             else:
-                results.append({
-                    "imageFile": imageFile,
-                    "status": "failed",
-                    "message": "Image could not be fetched from S3"
-                })
+                print(f"Failed to fetch or process image for fileId: {fileId}")
 
-        return {"status": "completed", "results": results}
+        return {"status": "completed", "results": list(groupedResults.values())}

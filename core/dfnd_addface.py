@@ -1,4 +1,3 @@
-import subprocess
 import cv2
 import numpy as np
 import dlib
@@ -11,44 +10,22 @@ class AddDogFace:
         self.knownFaceEncodings = []
         self.knownFaceNames = []
 
-    def fetchImageFromS3(self, s3Link):
-        command = f"aws s3 cp {s3Link} -"
-        result = subprocess.run(command, shell=True, capture_output=True)
-        if result.returncode == 0:
-            imageBytes = result.stdout
-            imageArray = np.frombuffer(imageBytes, np.uint8)
-            image = cv2.imdecode(imageArray, cv2.IMREAD_COLOR)
-            return image
-        else:
-            print("Failed to fetch image from S3.")
-            return None
-
-    def processSingleImage(self, image, dogName):
+    def processSingleImage(self, image, dogId):
         image = self.resizeImage(image, targetWidth=200)
         detsLocations = faceLocations(image, 1)
         faceEncodings = face_recognition.face_encodings(image, detsLocations)
 
-        results = []
         if faceEncodings:
-            for faceEncoding, location in zip(faceEncodings, detsLocations):
+            for faceEncoding in faceEncodings:
                 self.knownFaceEncodings.append(faceEncoding)
-                self.knownFaceNames.append(dogName)
-
-                top, right, bottom, left = location
-                results.append({
-                    "status": "success",
-                    "message": f"Dog: {dogName}, Face detected at [{top}, {right}, {bottom}, {left}]"
-                })
+                self.knownFaceNames.append(dogId)
+                print(f"DogId: {dogId}, face added successfully.")
         else:
-            results.append({
-                "status": "failed",
-                "message": "No face detected in image"
-            })
+            print(f"No face detected for DogId: {dogId}.")
 
         np.save('numpy/known_faces.npy', self.knownFaceEncodings)
         np.save('numpy/known_names.npy', self.knownFaceNames)
-        results.append({"status": "success", "message": "Finished adding known faces and saved encodings."})
-        return results
+        print(f"Known faces and names saved for DogId: {dogId}.")
 
     def resizeImage(self, image, targetWidth=200):
         height, width = image.shape[:2]
