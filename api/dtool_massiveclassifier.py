@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from core.dfnd_facerecog import DogFaceRecognize
 
+
 class DogImageClassifier:
     def __init__(self):
         self.recognizer = DogFaceRecognize()
@@ -23,10 +24,13 @@ class DogImageClassifier:
 
     def classifyImages(self, dailyPictures):
         groupedResults = {}
+        print(type(dailyPictures))
+        print(dailyPictures)
 
         for picture in dailyPictures:
-            fileId = picture["fileId"]
-            url = picture["url"]
+
+            fileId = picture.fileId
+            url = picture.url
 
             print(f"Processing fileId: {fileId}, url: {url}")
             image = self.fetchImage(url)

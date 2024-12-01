@@ -23,7 +23,7 @@ class ClassifyRequest(BaseModel):
 
 @app.post("/face/")
 async def classify(request: ClassifyRequest):
-    learner.processMultipleImagesFromS3(request.dogsData)
+    learner.processMultipleImages(request.dogsData)
     classifier = DogImageClassifier()
     print("signal: API request received")
     return classifier.classifyImages(request.dailyPictures)
