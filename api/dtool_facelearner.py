@@ -17,6 +17,8 @@ class DogFaceLearner:
             os.remove('numpy/known_faces.npy')
         if os.path.exists('numpy/known_names.npy'):
             os.remove('numpy/known_names.npy')
+        files = os.listdir('numpy')
+        print(f"Files in numpy directory after deletion: {files}")
         
         for dogData in dogsData:
             dogId = dogData.dogId
