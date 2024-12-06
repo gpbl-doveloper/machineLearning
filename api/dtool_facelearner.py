@@ -12,8 +12,13 @@ class DogFaceLearner:
         """
         Process multiple dogs' data containing dogId and their respective image URLs.
         """
+        # 기존 numpy 파일들 삭제
+        if os.path.exists('numpy/known_faces.npy'):
+            os.remove('numpy/known_faces.npy')
+        if os.path.exists('numpy/known_names.npy'):
+            os.remove('numpy/known_names.npy')
+        
         for dogData in dogsData:
-            # Pydantic 객체에서 속성 접근 방식 사용
             dogId = dogData.dogId
             faces = dogData.faces
 
